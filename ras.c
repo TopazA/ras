@@ -7,6 +7,8 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
+#define SSH ssh -Y
+
 // Create a default configuration file in $HOME/.ras/config if none exists.
 int create_default_config_file()
 {
@@ -183,7 +185,7 @@ int ssh(char user[64][64],char server[64][64],char hostname[64][64],int i, char 
 {
 	char * command = (char *)malloc(1024);
 
-	snprintf(command,1024,"ssh %s@%s 'cd \"%s\" ; %s'",user[i],hostname[i],cwd[i],line);
+	snprintf(command,1024,"ssh -Y %s@%s 'cd \"%s\" ; %s'",user[i],hostname[i],cwd[i],line);
 	//printf("%s\n",command);
 	system(command);
 
