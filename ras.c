@@ -7,7 +7,17 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define SSH ssh -Y
+struct config_structure 
+{
+	char server[64][64];
+	char hostname[64][64];
+	char user[64][64];
+	char cwd[64][1024];
+	int quantity;
+	int selected;
+};
+
+typedef struct config_structure config;
 
 // Create a default configuration file in $HOME/.ras/config if none exists.
 int create_default_config_file()
@@ -122,7 +132,7 @@ int get_value(char * text)
 }
 
 // Load the configuration file
-int load_config_file(char user[64][64],char  server[64][64],char  hostname[64][64])
+int load_config_file(config * conf)
 {
 	char * config_file = (char *) malloc(1024);
 	FILE * fd;
@@ -146,7 +156,7 @@ int load_config_file(char user[64][64],char  server[64][64],char  hostname[64][6
 		if(clean_section(line) == 1)
 		{
 			i++;
-			strncpy(server[i],line,64);
+			strncpy(conf->server[i],line,64);
 		}
 		else
 		{
@@ -154,39 +164,39 @@ int load_config_file(char user[64][64],char  server[64][64],char  hostname[64][6
 			if(type == 0)
 				fprintf(stderr,"WARNING error in config file line %d\n",x);
 			if(type == 1)
-				strncpy(hostname[i],line,64);
+				strncpy(conf->hostname[i],line,64);
 			if(type == 2)
-				strncpy(user[i],line,64);
+				strncpy(conf->user[i],line,64);
 		}
 	}
 	fclose(fd);
 
 	free(config_file);
 	free(line);
+	conf->quantity = i;
 	return i;
 }
 
 // Print list of available servers
-int print_list_server(char user[64][64],char server[64][64],char hostname[64][64],int i)
+int print_list_server(config * conf)
 {
 	int j;
 	printf("\n");
-	for(j = 1; j <= i;j++)
+	for(j = 1; j <= conf->quantity;j++)
 	{
-		printf("%d / %s:\t",j,server[j]);
-		printf("%s@%s\n",user[j],hostname[j]);
+		printf("%d / %s:\t",j,conf->server[j]);
+		printf("%s@%s\n",conf->user[j],conf->hostname[j]);
 	}
 	printf("\n");
 	return 1;
 }
 
 // Launch an ssh command on the remote selected server
-int ssh(char user[64][64],char server[64][64],char hostname[64][64],int i, char * line,char cwd[64][1024])
+int ssh(config * conf, char * line)
 {
 	char * command = (char *)malloc(1024);
 
-	snprintf(command,1024,"ssh -Y %s@%s 'cd \"%s\" ; %s'",user[i],hostname[i],cwd[i],line);
-	//printf("%s\n",command);
+	snprintf(command,1024,"ssh -Y %s@%s 'cd \"%s\" ; %s'",conf->user[conf->selected],conf->hostname[conf->selected],conf->cwd[conf->selected],line);
 	system(command);
 
 	free(command);
@@ -194,24 +204,24 @@ int ssh(char user[64][64],char server[64][64],char hostname[64][64],int i, char 
 }
 
 // Get the current working directory
-int pwd(char user[64][64],char server[64][64],char hostname[64][64],int i, char cwd[64][1024])
+int pwd(config * conf)
 {
 	FILE * fd;
 	char * command = (char *)malloc(2048);
 
-	if(strlen(cwd[i]) <= 0)
-	snprintf(command,2048,"ssh %s@%s pwd",user[i],hostname[i]);
+	if(strlen(conf->cwd[conf->selected]) <= 0)
+		snprintf(command,2048,"ssh %s@%s pwd",conf->user[conf->selected],conf->hostname[conf->selected]);
+
 	fd = popen(command,"r");
-	fread_line(fd,cwd[i]);
+	fread_line(fd,conf->cwd[conf->selected]);
 	pclose(fd);
-	//printf("--%s--\n",cwd[i]);
 
 	free(command);
 	return 0;
 }
 
 // Edit a file with vim
-int vim(char user[64][64],char server[64][64],char hostname[64][64],int i, char cwd[64][1024],char * line)
+int vim(config * conf,char * line)
 {
 	int a;
 	int e = 0;
@@ -232,7 +242,7 @@ int vim(char user[64][64],char server[64][64],char hostname[64][64],int i, char 
 	}
 	l2[e] = '\0';
 
-	snprintf(command,1024,"vim scp://%s@%s/%s/%s",user[i],hostname[i],cwd[i],l2);
+	snprintf(command,1024,"vim scp://%s@%s/%s/%s",conf->user[conf->selected],conf->hostname[conf->selected],conf->cwd[conf->selected],l2);
 	printf("+++ %s +++\n",command);
 	system(command);
 	free(command);
@@ -241,15 +251,13 @@ int vim(char user[64][64],char server[64][64],char hostname[64][64],int i, char 
 }
 
 // Change directory for a server
-int cd(char user[64][64],char server[64][64],char hostname[64][64],int i, char cwd[64][1024],char * line)
+int cd(config * conf,char * line)
 {
 	int a;
 	int j = 0;
 	char * command = (char *) malloc(1024);
 	FILE * fd;
 
-	printf("++%d++\n",i);
-	
 	for(a = 0; a < strlen(line); a++)
 	{
 		if(line[a] == ';'
@@ -261,15 +269,16 @@ int cd(char user[64][64],char server[64][64],char hostname[64][64],int i, char c
 		line[j++] = line[a];
 	}
 
-	if(strlen(cwd[i]) == 0)
-		snprintf(command,1024,"ssh %s@%s '%s ; pwd'",user[i],hostname[i],line);
+	if(strlen(conf->cwd[conf->selected]) == 0)
+		snprintf(command,1024,"ssh %s@%s '%s ; pwd'",conf->user[conf->selected],conf->hostname[conf->selected],line);
 	else
-		snprintf(command,1024,"ssh %s@%s 'cd \"%s\" ; %s ; pwd'",user[i],hostname[i],cwd[i],line);
+		snprintf(command,1024,"ssh %s@%s 'cd \"%s\" ; %s ; pwd'",conf->user[conf->selected],conf->hostname[conf->selected],conf->cwd[conf->selected],line);
+
 	printf("%s\n",command);
 	fd = popen(command,"r");
-	fread_line(fd,cwd[i]);
+	fread_line(fd,conf->cwd[conf->selected]);
 	pclose(fd);
-	printf("--%s--\n",cwd[i]);
+	printf("--%s--\n",conf->cwd[conf->selected]);
 
 	free(command);
 	return 0;
@@ -279,19 +288,16 @@ int cd(char user[64][64],char server[64][64],char hostname[64][64],int i, char c
 // Main ;)
 int main (int argc, char * argv[])
 {
-	char user[64][64];
-	char server[64][64];
-	char hostname[64][64];
-	char cwd[64][1024];
+	config conf;
+	conf.selected = 0;
 	char * prompt = (char *)malloc(256);
 	int i;
 	char * input;
-	int selected = 0;
 
 	snprintf(prompt,256," ==> ");
 	create_default_config_file();
-	i = load_config_file(user,server,hostname);
-	print_list_server(user,server,hostname,i);
+	i = load_config_file(&conf);
+	print_list_server(&conf);
 	while(1)
 	{
 		input = readline(prompt);
@@ -301,33 +307,33 @@ int main (int argc, char * argv[])
 			free(prompt);
 			return 0;
 		}
-		else if(selected != 0 && strcmp(input,"m") == 0)
+		else if(conf.selected != 0 && strcmp(input,"m") == 0)
 		{
 			snprintf(prompt,256," ==> ");
-			selected = 0;
+			conf.selected = 0;
 		}
 
 		else if(atoi(input) <= i && atoi(input) >= 1)
 		{
-			selected = atoi(input);
-			pwd(user,server,hostname,selected,cwd);
-			snprintf(prompt,256,"[ %s ] %s@%s:%s ==> ",server[selected],user[selected],hostname[selected],cwd[selected]);
+			conf.selected = atoi(input);
+			pwd(&conf);
+			snprintf(prompt,256,"[ %s ] %s@%s:%s ==> ",conf.server[conf.selected],conf.user[conf.selected],conf.hostname[conf.selected],conf.cwd[conf.selected]);
 		}
-		else if(selected != 0 && input[0] == 'c' && input[1] == 'd' && input[2] == ' ')
+		else if(conf.selected != 0 && input[0] == 'c' && input[1] == 'd' && input[2] == ' ')
 		{
-			cd(user,server,hostname,selected,cwd,input);
-			snprintf(prompt,256,"[ %s ] %s@%s:%s ==> ",server[selected],user[selected],hostname[selected],cwd[selected]);
+			cd(&conf,input);
+			snprintf(prompt,256,"[ %s ] %s@%s:%s ==> ",conf.server[conf.selected],conf.user[conf.selected],conf.hostname[conf.selected],conf.cwd[conf.selected]);
 		}
 
-		else if(selected != 0 && strlen(input) > 1 
+		else if(conf.selected != 0 && strlen(input) > 1 
 			&& input[0] == 'v' && input[1] == 'i' && input[2] == 'm' && input[3] == ' ')
-			 vim(user,server,hostname,selected,cwd,input);
+			 vim(&conf,input);
 
-		else if(selected != 0 && strlen(input) > 1)
-			ssh(user,server,hostname,selected,input,cwd);
+		else if(conf.selected != 0 && strlen(input) > 1)
+			ssh(&conf,input);
 
-		if(selected == 0)
-			print_list_server(user,server,hostname,i);
+		if(conf.selected == 0)
+			print_list_server(&conf);
 		
 		add_history(input);
 		free(input);
