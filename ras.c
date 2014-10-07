@@ -284,6 +284,18 @@ int cd(config * conf,char * line)
 	return 0;
 }
 
+int help()
+{
+	printf("\tType the number of the server you want to connect to\n");
+	printf("\tType 'm' to select another server\n");
+	printf("\tOnce connected to a server, you can use any non interactive command\n");
+	printf("\tUsage of interactive software is not recommended, result is not warranted\n");
+	printf("\tYou can edit a file using the command 'vim' followed by the name of the file\n");
+	printf("\tBug reports to stephane@unices.org\n");
+	printf("\tYour configuration file is in %s/.ras/config\n",getenv("HOME"));
+	return 0;
+}
+
 
 // Main ;)
 int main (int argc, char * argv[])
@@ -307,6 +319,8 @@ int main (int argc, char * argv[])
 			free(prompt);
 			return 0;
 		}
+		else if(strcmp(input,"help") == 0 || strcmp(input,"?") == 0)
+			help();
 		else if(conf.selected != 0 && strcmp(input,"m") == 0)
 		{
 			snprintf(prompt,256," ==> ");
