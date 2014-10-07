@@ -12,7 +12,7 @@ struct config_structure
 	char server[64][64];
 	char hostname[64][64];
 	char user[64][64];
-	char cwd[64][1024];
+	char cwd[64][256];
 	int quantity;
 	int selected;
 };
