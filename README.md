@@ -7,7 +7,7 @@ ras is nothing more than a wrapper to call some ssh command from a
 remote server. For each command, ras will establish a SSH connection,
 launch a command and return its result.
 
-ras is in alpha version and is VERY buggy at this point. It does not
+ras is in alpha version and still buggy at this point. It does not
 support yet command who require terminal information such as mutt or
 slrn.
 
@@ -25,7 +25,7 @@ command.
 Even I'm using it my self to reach some server over a dumb 3G
 connection, ras is NOT a very serious software. First it's using C
 because I'm learning C, but it would be much smarter to write it in Perl
-(I wrote the version in Perl).
+(I wrote the version in Perl) or even in shell.
 
 To install it, just compile it with 'make' and copy the binary file
 where ever fits you.
