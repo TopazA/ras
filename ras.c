@@ -286,11 +286,15 @@ int cd(config * conf,char * line)
 
 int help()
 {
-	printf("\tType the number of the server you want to connect to\n");
-	printf("\tType 'm' to select another server\n");
-	printf("\tOnce connected to a server, you can use any non interactive command\n");
+	printf("\tRAS Ver 0.03\n\n");
+	printf("\t\tTo connect to a server\n");
+	printf("\tType the number of the server you want to connect to\n\n");
+	printf("\t\tTo disconnect from a server\n");
+	printf("\tType 'm', it brings you back to main menu\n\n");
+	printf("\tOnce connected to a server, you can use any *non* interactive command\n");
 	printf("\tUsage of interactive software is not recommended, result is not warranted\n");
-	printf("\tYou can edit a file using the command 'vim' followed by the name of the file\n");
+	printf("\tEdit a file using the command 'vim' followed by the name of the file\n");
+	printf("\t(Vim is required for this last feature to work, other editor are *NOT* supported\n\n"); 
 	printf("\tBug reports to stephane@unices.org\n");
 	printf("\tYour configuration file is in %s/.ras/config\n",getenv("HOME"));
 	return 0;
