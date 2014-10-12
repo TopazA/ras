@@ -7,28 +7,32 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-
 // Define reserved commands
-#define CD 1
-#define VIM 2
-#define LLS 3
-#define LCD 4
-#define LMKDIR 5
-#define LRMDIR 6
-#define LRM 7
-#define GET 8
-#define PUT 9
-#define HELP 10
-#define MAIN 11
-#define OTHER 12
-#define EXIT 13
+#define CD 		1
+#define VIM 	2
+#define LLS 	3
+#define LCD 	4
+#define LMKDIR 	5
+#define LRMDIR 	6
+#define LRM 	7
+#define GET 	8
+#define PUT 	9
+#define HELP 	10
+#define MAIN 	11
+#define OTHER 	12
+#define EXIT 	13
+
+#define MAX_ENTRIES			64
+#define CONF_LINE_LENGTH	64
+#define DIR_LENGTH			256
+#define COMMAND_LENGTH		256
 
 struct config_structure 
 {
-	char server[64][64];
-	char hostname[64][64];
-	char user[64][64];
-	char cwd[64][256];
+	char server[MAX_ENTRIES][CONF_LINE_LENGTH];
+	char hostname[MAX_ENTRIES][CONF_LINE_LENGTH];
+	char user[MAX_ENTRIES][CONF_LINE_LENGTH];
+	char cwd[MAX_ENTRIES][DIR_LENGTH];
 	int quantity;
 	int selected;
 };
@@ -40,17 +44,17 @@ int create_default_config_file()
 {
 	DIR * dir;
 	FILE * fd;
-	char * config_dir = (char *) malloc(1024);
-	char * config_file = (char *) malloc(1024);
+	char * config_dir = (char *) malloc(DIR_LENGTH);
+	char * config_file = (char *) malloc(DIR_LENGTH);
 	char * user = getenv("USER");
 
-	snprintf(config_dir,1024,"%s/.ras", getenv("HOME"));
+	snprintf(config_dir,DIR_LENGTH,"%s/.ras", getenv("HOME"));
 	if((dir = opendir(config_dir)) != NULL)
 		closedir(dir);
 	else
 		mkdir(config_dir,0700);
 
-	snprintf(config_file,1024,"%s/config",config_dir);
+	snprintf(config_file,DIR_LENGTH,"%s/config",config_dir);
 	if((fd = fopen(config_file,"r")) != NULL)
 		fclose(fd);
 	else
@@ -150,14 +154,14 @@ int get_value(char * text)
 // Load the configuration file
 int load_config_file(config * conf)
 {
-	char * config_file = (char *) malloc(1024);
+	char * config_file = (char *) malloc(DIR_LENGTH);
 	FILE * fd;
 	char * line = (char *) malloc(1024);
 	int i = 0;
 	int type;
 	int x = 0;
 
-	snprintf(config_file,1024,"%s/.ras/config",getenv("HOME"));
+	snprintf(config_file,DIR_LENGTH,"%s/.ras/config",getenv("HOME"));
 	if((fd = fopen(config_file,"r")) == NULL)
 	{
 		fprintf(stderr,"FATAL: Can not open %s for reading\n",config_file);
@@ -210,9 +214,10 @@ int print_list_server(config * conf)
 // Launch an ssh command on the remote selected server
 int ssh(config * conf, char * line)
 {
-	char * command = (char *)malloc(1024);
+	char * command = (char *)malloc(DIR_LENGTH);
 
-	snprintf(command,1024,"ssh -Y %s@%s 'cd \"%s\" ; %s'",conf->user[conf->selected],conf->hostname[conf->selected],conf->cwd[conf->selected],line);
+	snprintf(command,DIR_LENGTH,"ssh -Y %s@%s 'cd \"%s\" ; %s'",
+			conf->user[conf->selected],conf->hostname[conf->selected],conf->cwd[conf->selected],line);
 	system(command);
 
 	free(command);
@@ -223,10 +228,10 @@ int ssh(config * conf, char * line)
 int pwd(config * conf)
 {
 	FILE * fd;
-	char * command = (char *)malloc(2048);
+	char * command = (char *)malloc(DIR_LENGTH);
 
 	if(strlen(conf->cwd[conf->selected]) <= 0)
-		snprintf(command,2048,"ssh %s@%s pwd",conf->user[conf->selected],conf->hostname[conf->selected]);
+		snprintf(command,DIR_LENGTH,"ssh %s@%s pwd",conf->user[conf->selected],conf->hostname[conf->selected]);
 
 	fd = popen(command,"r");
 	fread_line(fd,conf->cwd[conf->selected]);
@@ -241,9 +246,9 @@ int vim(config * conf,char * line)
 {
 	int a;
 	int e = 0;
-	char * command = (char *) malloc(1024);
-	char * l2 = (char *) malloc(1024);
-	strncpy(l2,line,1024);
+	char * command = (char *) malloc(DIR_LENGTH);
+	char * l2 = (char *) malloc(DIR_LENGTH);
+	strncpy(l2,line,DIR_LENGTH);
 
 	for(a = 0; a < strlen(l2); a++)
 	{
@@ -258,7 +263,9 @@ int vim(config * conf,char * line)
 	}
 	l2[e] = '\0';
 
-	snprintf(command,1024,"vim scp://%s@%s/%s/%s",conf->user[conf->selected],conf->hostname[conf->selected],conf->cwd[conf->selected],l2);
+	snprintf(command,DIR_LENGTH,"vim scp://%s@%s/%s/%s"
+			,conf->user[conf->selected],conf->hostname[conf->selected],conf->cwd[conf->selected],l2);
+
 	printf("+++ %s +++\n",command);
 	system(command);
 	free(command);
@@ -286,9 +293,12 @@ int cd(config * conf,char * line)
 	}
 
 	if(strlen(conf->cwd[conf->selected]) == 0)
-		snprintf(command,1024,"ssh %s@%s '%s ; pwd'",conf->user[conf->selected],conf->hostname[conf->selected],line);
+		snprintf(command,1024,"ssh %s@%s '%s ; pwd'",
+							conf->user[conf->selected],conf->hostname[conf->selected],line);
 	else
-		snprintf(command,1024,"ssh %s@%s 'cd \"%s\" ; %s ; pwd'",conf->user[conf->selected],conf->hostname[conf->selected],conf->cwd[conf->selected],line);
+		snprintf(command,1024,"ssh %s@%s 'cd \"%s\" ; %s ; pwd'",
+							conf->user[conf->selected],
+							conf->hostname[conf->selected],conf->cwd[conf->selected],line);
 
 	printf("%s\n",command);
 	fd = popen(command,"r");
@@ -337,7 +347,7 @@ int get_command_type(char * line)
 	else if(start_with("cd ",line) == 0)
 		type = CD;
 
-	else if(line[0] == 'v' && line[1] == 'i' && line[2] == 'm' && line[3] == ' ')
+	else if(start_with("vim ",line) == 0)
 		type = VIM;
 	
 	else if(strcmp(line,"help") == 0 || strcmp(line,"?") == 0)
@@ -346,10 +356,10 @@ int get_command_type(char * line)
 	else if(strcmp(line,"m") == 0)
 		type = MAIN;
 
-	else if(line[0] == 'g' && line[1] == 'e' && line[2] == 't' && line[3] == ' ')
+	else if(start_with("get ",line) == 0)
 		type = GET;
 	
-	else if(line[0] == 'p' && line[1] == 'u' && line[2] == 't' && line[3] == ' ')
+	else if(start_with("put ",line) == 0)
 		type = PUT;
 	
 	else type = OTHER;
@@ -399,7 +409,9 @@ int main (int argc, char * argv[])
 				if(conf.selected != 0)
 				{
 					cd(&conf,input);
-					snprintf(prompt,256,"[ %s ] %s@%s:%s ==> ",conf.server[conf.selected],conf.user[conf.selected],conf.hostname[conf.selected],conf.cwd[conf.selected]);
+					snprintf(prompt,256,"[ %s ] %s@%s:%s ==> ",
+								conf.server[conf.selected],conf.user[conf.selected],
+								conf.hostname[conf.selected],conf.cwd[conf.selected]);
 					break;
 				}
 
@@ -415,7 +427,9 @@ int main (int argc, char * argv[])
 				{
 					conf.selected = atoi(input);
 					pwd(&conf);
-					snprintf(prompt,256,"[ %s ] %s@%s:%s ==> ",conf.server[conf.selected],conf.user[conf.selected],conf.hostname[conf.selected],conf.cwd[conf.selected]);
+					snprintf(prompt,256,"[ %s ] %s@%s:%s ==> ",
+								conf.server[conf.selected],conf.user[conf.selected],
+								conf.hostname[conf.selected],conf.cwd[conf.selected]);
 					break;
 				}
 				else if(conf.selected != 0 && strlen(input) > 1)
