@@ -8,7 +8,7 @@
 #include <readline/history.h>
 
 
-// Define special commands
+// Define reserved commands
 #define CD 1
 #define VIM 2
 #define LLS 3
@@ -316,25 +316,42 @@ int help()
 	return 0;
 }
 
+// return 0 if line start with p
+int start_with(char * p,char * line)
+{
+	int i;
+	for(i = 0; i < strlen(p); i++)
+		if(p[i] != line[i])
+			return -1;
+	return 0;
+}
+
 //Get the command type
 int get_command_type(char * line)
 {
 	int type;
 
-	if(line[0] == 'c' && line[1] == 'd' && line[2] == ' ')
+	if(line == NULL || strcmp(line,"exit") == 0)
+		type = EXIT;
+
+	else if(start_with("cd ",line) == 0)
 		type = CD;
 
 	else if(line[0] == 'v' && line[1] == 'i' && line[2] == 'm' && line[3] == ' ')
 		type = VIM;
-
-	else if(line == NULL || strcmp(line,"exit") == 0)
-		type = EXIT;
 	
 	else if(strcmp(line,"help") == 0 || strcmp(line,"?") == 0)
 		type = HELP;
 
-	
+	else if(strcmp(line,"m") == 0)
+		type = MAIN;
 
+	else if(line[0] == 'g' && line[1] == 'e' && line[2] == 't' && line[3] == ' ')
+		type = GET;
+	
+	else if(line[0] == 'p' && line[1] == 'u' && line[2] == 't' && line[3] == ' ')
+		type = PUT;
+	
 	else type = OTHER;
 	
 	return type;
@@ -348,6 +365,7 @@ int main (int argc, char * argv[])
 	char * prompt = (char *)malloc(256);
 	int i;
 	char * input;
+	int type;
 
 	snprintf(prompt,256," ==> ");
 	create_default_config_file();
@@ -356,42 +374,64 @@ int main (int argc, char * argv[])
 	while(1)
 	{
 		input = readline(prompt);
-		if(input == NULL || strcmp(input,"exit") == 0 )
-		{
-			printf("Bye\n");
-			free(prompt);
-			return 0;
-		}
-		else if(strcmp(input,"help") == 0 || strcmp(input,"?") == 0)
-			help();
-		else if(conf.selected != 0 && strcmp(input,"m") == 0)
-		{
-			snprintf(prompt,256," ==> ");
-			conf.selected = 0;
-		}
+		type = get_command_type(input);
 
-		else if(atoi(input) <= i && atoi(input) >= 1)
+		switch(type)
 		{
-			conf.selected = atoi(input);
-			pwd(&conf);
-			snprintf(prompt,256,"[ %s ] %s@%s:%s ==> ",conf.server[conf.selected],conf.user[conf.selected],conf.hostname[conf.selected],conf.cwd[conf.selected]);
+			case EXIT:
+				printf("Bye\n");
+				free(prompt);
+				return 0;
+
+			case HELP:
+				help();
+				break;
+
+			case MAIN:
+				if(conf.selected != 0)
+				{
+					snprintf(prompt,256," ==> ");
+					conf.selected = 0;
+					break;
+				}
+			
+			case CD:
+				if(conf.selected != 0)
+				{
+					cd(&conf,input);
+					snprintf(prompt,256,"[ %s ] %s@%s:%s ==> ",conf.server[conf.selected],conf.user[conf.selected],conf.hostname[conf.selected],conf.cwd[conf.selected]);
+					break;
+				}
+
+			case VIM:
+				if(conf.selected != 0 )
+				{
+			 		vim(&conf,input);
+					break;
+				}
+
+			case OTHER:
+				if(conf.selected == 0 && atoi(input) <= i && atoi(input) >= 1)
+				{
+					conf.selected = atoi(input);
+					pwd(&conf);
+					snprintf(prompt,256,"[ %s ] %s@%s:%s ==> ",conf.server[conf.selected],conf.user[conf.selected],conf.hostname[conf.selected],conf.cwd[conf.selected]);
+					break;
+				}
+				else if(conf.selected != 0 && strlen(input) > 1)
+				{
+					ssh(&conf,input);
+					break;
+				}
+
+				else if(conf.selected == 0)
+				{
+					print_list_server(&conf);
+					break;
+				}
+			default:
+				break;
 		}
-		else if(conf.selected != 0 && input[0] == 'c' && input[1] == 'd' && input[2] == ' ')
-		{
-			cd(&conf,input);
-			snprintf(prompt,256,"[ %s ] %s@%s:%s ==> ",conf.server[conf.selected],conf.user[conf.selected],conf.hostname[conf.selected],conf.cwd[conf.selected]);
-		}
-
-		else if(conf.selected != 0 && strlen(input) > 1 
-			&& input[0] == 'v' && input[1] == 'i' && input[2] == 'm' && input[3] == ' ')
-			 vim(&conf,input);
-
-		else if(conf.selected != 0 && strlen(input) > 1)
-			ssh(&conf,input);
-
-		if(conf.selected == 0)
-			print_list_server(&conf);
-		
 		add_history(input);
 		free(input);
 	}
