@@ -7,6 +7,22 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
+
+// Define special commands
+#define CD 1
+#define VIM 2
+#define LLS 3
+#define LCD 4
+#define LMKDIR 5
+#define LRMDIR 6
+#define LRM 7
+#define GET 8
+#define PUT 9
+#define HELP 10
+#define MAIN 11
+#define OTHER 12
+#define EXIT 13
+
 struct config_structure 
 {
 	char server[64][64];
@@ -300,6 +316,29 @@ int help()
 	return 0;
 }
 
+//Get the command type
+int get_command_type(char * line)
+{
+	int type;
+
+	if(line[0] == 'c' && line[1] == 'd' && line[2] == ' ')
+		type = CD;
+
+	else if(line[0] == 'v' && line[1] == 'i' && line[2] == 'm' && line[3] == ' ')
+		type = VIM;
+
+	else if(line == NULL || strcmp(line,"exit") == 0)
+		type = EXIT;
+	
+	else if(strcmp(line,"help") == 0 || strcmp(line,"?") == 0)
+		type = HELP;
+
+	
+
+	else type = OTHER;
+	
+	return type;
+}
 
 // Main ;)
 int main (int argc, char * argv[])
