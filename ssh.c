@@ -4,10 +4,14 @@
 #include <errno.h>
 #include <strings.h>
 #include <string.h>
+#include <sys/types.h>
+#include <dirent.h>
+
 
 #define SERVER 	"192.168.0.170"
 #define USER	"stephane"
 int verify_knownhost(ssh_session session);
+int verify_local_knownhost(ssh_session ps);
 
 int main(int argc,char * argv[])
 {
@@ -24,7 +28,7 @@ int main(int argc,char * argv[])
 		fprintf(stderr, "Error connecting to localhost: %s\n", ssh_get_error(ps));
 		return -1;
 	}
-	if((rc = verify_knownhost(ps)) != 0)
+	if((rc = verify_local_knownhost(ps)) != 0)
 		return -1;
 
     ssh_disconnect(ps);
@@ -33,72 +37,39 @@ int main(int argc,char * argv[])
 	return 0;
 }
 
-
-
-int verify_knownhost(ssh_session session)
+int verify_local_knownhost(ssh_session ps)
 {
-	int state, hlen;
-	unsigned char *hash = NULL;
-	char *hexa;
-	char buf[10];
+	unsigned char * key = (unsigned char *) malloc(1024);
+	int hlen;
+	char * hkey;
 
-	state = ssh_is_server_known(session);
-	hlen = ssh_get_pubkey_hash(session, &hash);
+	hlen = ssh_get_pubkey_hash(ps, &key);
 
 	if (hlen < 0)
 		return -1;
 
-	switch (state)
-	{
-		case SSH_SERVER_KNOWN_OK:
-			break; /* ok */
+	hkey = ssh_get_hexa	(key, hlen);
+	
+	printf("--\n%s\n--",hkey);
 
-		case SSH_SERVER_KNOWN_CHANGED:
-			fprintf(stderr, "Host key for server changed: it is now:\n");
-			ssh_print_hexa("Public key hash", hash, hlen);
-			fprintf(stderr, "For security reasons, connection will be stopped\n");
-			free(hash);
-			return -1;
-
-		case SSH_SERVER_FOUND_OTHER:
-			fprintf(stderr, "The host key for this server was not found but an other type of key exists.\n");
-			fprintf(stderr, "An attacker might change the default server key to confuse your client into thinking the key does not exist\n");
-			free(hash);
-			return -1;
-
-		case SSH_SERVER_FILE_NOT_FOUND:
-			fprintf(stderr, "Could not find known host file.\n");
-			fprintf(stderr, "If you accept the host key here, the file will be automatically created.\n");
-
-		case SSH_SERVER_NOT_KNOWN:
-			hexa = ssh_get_hexa(hash, hlen);
-			fprintf(stderr,"The server is unknown. Do you trust the host key?\n");
-			fprintf(stderr, "Public key hash: %s\n", hexa);
-			free(hexa);
-			if (fgets(buf, sizeof(buf), stdin) == NULL)
-			{
-				free(hash);
-				return -1;
-			}
-			if (strncasecmp(buf, "yes", 3) != 0)
-			{
-				free(hash);
-				return -1;
-			}
-			if (ssh_write_knownhost(session) < 0)
-			{
-				fprintf(stderr, "Error %s\n", strerror(errno));
-				free(hash);
-				return -1;
-			}
-			break;
-
-		case SSH_SERVER_ERROR:
-			fprintf(stderr, "Error %s", ssh_get_error(session));
-			free(hash);
-			return -1;
-	}
-	free(hash);
+	free(key);
+	free(hkey);
 	return 0;
 }
+
+int save_local_host(char * host, char * key)
+{
+	char * dir = (char *) malloc(256);
+	DIR * pdir;
+
+	dir = snprintf(dir,256,"%s/.ras/ssh/",get_env("HOME"));
+
+	if((pdir = opendir(dir)) != NULL)
+		closedir(pdir);
+	else
+		mkdir(dir,0700);
+	
+}
+
+	
 
