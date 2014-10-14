@@ -1,17 +1,5 @@
-#include <libssh/libssh.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <errno.h>
-#include <strings.h>
-#include <string.h>
-#include <sys/types.h>
-#include <dirent.h>
-#include <sys/stat.h>
+#include "ssh.h"
 
-#define SSHKEY_OK 0
-#define SSHKEY_ABSENT 1
-#define SSHKEY_DIFFER 2
-#define SSHKEY_ERROR 3
 
 int verify_knownhost(ssh_session session);
 int verify_local_knownhost(char * host,ssh_session ps);
@@ -114,11 +102,13 @@ int compare_key(char * host, char * key)
 
 			r = SSHKEY_ERROR;
 		}
+		else
+		{
+			fprintf(fd,"%s\n",key);
+			fclose(fd);
 
-		fprintf(fd,"%s\n",key);
-		fclose(fd);
-
-		r = SSHKEY_ABSENT;
+			r = SSHKEY_ABSENT;
+		}
 	}
 	else
 	{
