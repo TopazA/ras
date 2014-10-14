@@ -8,11 +8,15 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
-
+#define SSHKEY_OK 0
+#define SSHKEY_ABSENT 1
+#define SSHKEY_DIFFER 2
+#define SSHKEY_ERROR 3
 
 int verify_knownhost(ssh_session session);
 int verify_local_knownhost(char * host,ssh_session ps);
-int save_local_host(char * host, char * key);
+int compare_key(char * host, char * key);
+int fread_line(FILE * fd,char * line);
 
 int main(int argc,char * argv[])
 {
@@ -44,6 +48,8 @@ int verify_local_knownhost(char * host,ssh_session ps)
 	unsigned char * key = (unsigned char *) malloc(1024);
 	int hlen;
 	char * hkey;
+	int check_key;
+	int r;
 
 	hlen = ssh_get_pubkey_hash(ps, &key);
 
@@ -52,21 +58,44 @@ int verify_local_knownhost(char * host,ssh_session ps)
 
 	hkey = ssh_get_hexa	(key, hlen);
 
-	save_local_host(host,hkey);
+	check_key = compare_key(host,hkey);
+
+	switch(check_key)
+	{
+		case SSHKEY_OK:
+			r = 0;
+			break;
+		
+		case SSHKEY_DIFFER:
+			fprintf(stderr,"Error: Server public key differs\n");
+			r = -1;
+			break;
+
+		case SSHKEY_ABSENT:
+			fprintf(stderr,"Info: Public key unknown, saved as valid key for this server\n");
+			r = 0;
+			break;
+
+		default:
+			fprintf(stderr,"Error: Unknown error\n");
+			r = -1;
+	}
 	
 	printf("--\n%s\n--",hkey);
 
 	free(key);
 	free(hkey);
-	return 0;
+	return r;
 }
 
-int save_local_host(char * host, char * key)
+int compare_key(char * host, char * key)
 {
 	char * dir = (char *) malloc(256);
 	char * file = (char *) malloc(256);
+	char * line = (char *) malloc(256);
 	DIR * pdir;
 	FILE * fd;
+	int r;
 
 	snprintf(dir,(size_t)256,"%s/.ras/ssh",getenv("HOME"));
 
@@ -77,21 +106,55 @@ int save_local_host(char * host, char * key)
 	
 	snprintf(file,(size_t)256,"%s/%s",dir,host);
 
-	if((fd = fopen(file,"w")) == NULL)
+	if((fd = fopen(file,"r")) == NULL)
 	{
-		fprintf(stderr,"Can not open %s\n",file);
-		free(file);
-		free(dir);
-		return -1;
-	}
+		if((fd = fopen(file,"w")) == NULL)
+		{
+			fprintf(stderr,"Can not open %s\n",file);
 
-	fprintf(fd,"%s\n",key);
-	fclose(fd);
+			r = SSHKEY_ERROR;
+		}
+
+		fprintf(fd,"%s\n",key);
+		fclose(fd);
+
+		r = SSHKEY_ABSENT;
+	}
+	else
+	{
+		fread_line(fd,line);
+	
+		if(strcmp(line,key) != 0)
+			r = SSHKEY_DIFFER;
+		else
+			r = SSHKEY_OK;
+
+		fclose(fd);
+	}
 
 	free(file);
 	free(dir);
-	return 0;
+	free(line);
+	return r;
 }
+
+//Returns the next line for a opened FD. '\n' is already cleaned up.
+int fread_line(FILE * fd,char * line)
+{
+	char a;
+	int i = 0;
+	while((a = fgetc(fd)) != EOF)
+	{
+		if(a == '\n')
+		{
+			line[i] = '\0';
+			return i;
+		}
+		line[i++] = a;
+	}
+	return EOF;
+}
+
 
 	
 
