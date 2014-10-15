@@ -5,12 +5,15 @@ int verify_knownhost(ssh_session session);
 int verify_local_knownhost(char * host,ssh_session ps);
 int compare_key(char * host, char * key);
 int fread_line(FILE * fd,char * line);
+int authenticate(ssh_session ps,char * username);
+char * get_priv_key();
 
 int main(int argc,char * argv[])
 {
 	ssh_session ps;
 	int rc;
 	char * host = argv[1];
+	char * username = argv[2];
 
 	ps = ssh_new();
 	ssh_options_set(ps,SSH_OPTIONS_HOST,host);
@@ -24,12 +27,53 @@ int main(int argc,char * argv[])
 	}
 	if((rc = verify_local_knownhost(host,ps)) != 0)
 		return -1;
+	
+	if((rc = authenticate(ps,username)) != 0)
+		return -1;
 
     ssh_disconnect(ps);
 	ssh_free(ps);
 
 	return 0;
 }
+
+int authenticate(ssh_session ps,char * username)
+{
+	int i;
+	char * key = get_priv_key();
+	i = ssh_userauth_password	(ps, username, key );
+	int r;
+	switch(i)
+	{
+		case SSH_AUTH_ERROR :
+			fprintf(stderr,"Something bad happened\n");
+			r = -1;
+			break;
+
+		case SSH_AUTH_DENIED :
+			fprintf(stderr,"Authentication failed\n");
+			r = -1;
+			break;
+
+		case SSH_AUTH_SUCCESS :
+			fprintf(stderr,"Authentication OK\n");
+			r = 0;
+			break;
+
+		default :
+			fprintf(stderr,"Unknown error %d\n",i);
+	}
+	return r;
+}
+
+char * get_priv_key()
+{
+	char * r = "hop";
+	return r;
+}
+
+
+
 
 int verify_local_knownhost(char * host,ssh_session ps)
 {
