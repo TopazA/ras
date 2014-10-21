@@ -112,6 +112,8 @@ int get_value(char * text)
 
 }
 
+
+
 // Load the configuration file
 int load_config_file(config * conf)
 {
