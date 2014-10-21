@@ -66,11 +66,6 @@ int main(int argc, char *argv[])
     char *userauthlist;
     LIBSSH2_SESSION *session;
     LIBSSH2_CHANNEL *channel;
-#ifdef WIN32
-    WSADATA wsadata;
- 
-    WSAStartup(MAKEWORD(2,0), &wsadata);
-#endif
  
     if (argc > 1) {
         hostaddr = inet_addr(argv[1]);
