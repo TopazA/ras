@@ -7,7 +7,6 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "config.h"
-#include "ssh.h"
 
 // Define reserved commands
 #define CD 		1
@@ -23,6 +22,9 @@
 #define MAIN 	11
 #define OTHER 	12
 #define EXIT 	13
+#define EDIT_CONFIG 14
+
+#define PROMPT_SIZE 256
 
 
 

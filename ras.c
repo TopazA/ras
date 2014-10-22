@@ -128,6 +128,7 @@ int help()
 	printf("\t(Vim is required for this last feature to work, other editor are *NOT* supported\n\n"); 
 	printf("\tBug reports to stephane@unices.org\n");
 	printf("\tYour configuration file is in %s/.ras/config\n",getenv("HOME"));
+	printf("\tBy typing 'edit_config' from ras, you can edit the configuration file");
 	return 0;
 }
 
@@ -167,9 +168,29 @@ int get_command_type(char * line)
 	else if(start_with("put ",line) == 0)
 		type = PUT;
 	
+	else if(strcmp(line,"edit_config") == 0)
+		type = EDIT_CONFIG;
+	
 	else type = OTHER;
 	
 	return type;
+}
+
+int edit_config()
+{
+	char * editor = getenv("EDITOR");
+	char * home = getenv("HOME");
+	char * cmd = (char *)malloc(256);
+
+	if(editor == NULL)
+	{
+		fprintf(stderr,"Please setup your EDITOR variable to use ras\n");
+		exit(-1);
+	}
+	snprintf(cmd,256,"%s %s/.ras/config",editor,home);
+	system(cmd);
+	free(cmd);
+	return 0;
 }
 
 // Main ;)
@@ -177,12 +198,12 @@ int main (int argc, char * argv[])
 {
 	config conf;
 	conf.selected = 0;
-	char * prompt = (char *)malloc(256);
+	char * prompt = (char *)malloc(PROMPT_SIZE);
 	int i;
 	char * input;
 	int type;
 
-	snprintf(prompt,256," ==> ");
+	snprintf(prompt,PROMPT_SIZE," ==> ");
 	create_default_config_file();
 	i = load_config_file(&conf);
 	print_list_server(&conf);
@@ -197,6 +218,10 @@ int main (int argc, char * argv[])
 				printf("Bye\n");
 				free(prompt);
 				return 0;
+
+			case EDIT_CONFIG:
+				edit_config();
+				break;
 
 			case HELP:
 				help();
@@ -214,7 +239,7 @@ int main (int argc, char * argv[])
 				if(conf.selected != 0)
 				{
 					cd(&conf,input);
-					snprintf(prompt,256,"[ %s ] %s@%s:%s ==> ",
+					snprintf(prompt,PROMPT_SIZE,"[ %s ] %s@%s:%s ==> ",
 								conf.server[conf.selected],conf.user[conf.selected],
 								conf.hostname[conf.selected],conf.cwd[conf.selected]);
 					break;
