@@ -117,7 +117,7 @@ int cd(config * conf,char * line)
 
 int help()
 {
-	printf("\tRAS Ver 0.03\n\n");
+	printf("\tRAS Ver 0.04a\n\n");
 	printf("\t\tTo connect to a server\n");
 	printf("\tType the number of the server you want to connect to\n\n");
 	printf("\t\tTo disconnect from a server\n");
@@ -126,9 +126,9 @@ int help()
 	printf("\tUsage of interactive software is not recommended, result is not warranted\n");
 	printf("\tEdit a file using the command 'vim' followed by the name of the file\n");
 	printf("\t(Vim is required for this last feature to work, other editor are *NOT* supported\n\n"); 
-	printf("\tBug reports to stephane@unices.org\n");
 	printf("\tYour configuration file is in %s/.ras/config\n",getenv("HOME"));
-	printf("\tBy typing 'edit_config' from ras, you can edit the configuration file");
+	printf("\tBy typing 'edit_config' from ras, you can edit the configuration file\n");
+	printf("\n\tBug reports to stephane@unices.org\n");
 	return 0;
 }
 
@@ -176,7 +176,7 @@ int get_command_type(char * line)
 	return type;
 }
 
-int edit_config()
+int edit_config(config * conf)
 {
 	char * editor = getenv("EDITOR");
 	char * home = getenv("HOME");
@@ -190,7 +190,8 @@ int edit_config()
 	snprintf(cmd,256,"%s %s/.ras/config",editor,home);
 	system(cmd);
 	free(cmd);
-	return 0;
+	clean_conf(conf);
+	return load_config_file(conf);
 }
 
 // Main ;)
@@ -220,7 +221,7 @@ int main (int argc, char * argv[])
 				return 0;
 
 			case EDIT_CONFIG:
-				edit_config();
+				i = edit_config(&conf);
 				break;
 
 			case HELP:

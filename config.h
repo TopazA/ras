@@ -31,3 +31,6 @@ int fread_line(FILE * fd,char * line);
 // Load the configuration file
 int load_config_file(config * conf);
 
+// Wipe out the configuration in memory (for reload)
+int clean_conf(config * conf);
+

@@ -112,7 +112,20 @@ int get_value(char * text)
 
 }
 
-
+int clean_conf(config * conf)
+{
+	int i;
+	for (i = 0; i < conf->quantity; i++)
+	{
+		conf->server[i][0] = '\0';
+		conf->hostname[i][0] = '\0';
+		conf->user[i][0] = '\0';
+		conf->cwd[i][0] = '\0';
+	}
+	conf->quantity = 0;
+	conf->selected = 0;
+	return i;
+}
 
 // Load the configuration file
 int load_config_file(config * conf)
