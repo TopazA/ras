@@ -34,6 +34,4 @@ You have a question, you think ras is a great software and you want some
 features, you notices a bug or you just want to say 'Hi'. Send me an
 email to stephane@unices.org
 
-There is a plan to use libssh instead of ssh command line, however
-libssh is so much not finished at this point ...
 
