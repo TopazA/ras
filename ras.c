@@ -171,6 +171,11 @@ int get_command_type(char * line)
 	else if(strcmp(line,"edit_config") == 0)
 		type = EDIT_CONFIG;
 	
+	else if(start_with("lls ",line) == 0
+			|| strcmp(line,"lls") == 0)
+		type = LLS;
+	
+	
 	else type = OTHER;
 	
 	return type;
@@ -226,6 +231,10 @@ int main (int argc, char * argv[])
 
 			case HELP:
 				help();
+				break;
+
+			case LLS:
+				lls(input);
 				break;
 
 			case MAIN:

@@ -7,6 +7,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "config.h"
+#include "lcommand.h"
 
 // Define reserved commands
 #define CD 		1
