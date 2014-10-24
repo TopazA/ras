@@ -172,9 +172,13 @@ int get_command_type(char * line)
 		type = EDIT_CONFIG;
 	
 	else if(start_with("lls ",line) == 0
-			|| strcmp(line,"lls") == 0)
+			|| strcmp(line,"lls") == 0
+			|| start_with("lrmdir ",line) == 0
+			|| start_with("lmkdir ",line) == 0)
 		type = LLS;
 	
+	else if(start_with("lcd ",line) == 0)
+		type = LCD;
 	
 	else type = OTHER;
 	
@@ -235,6 +239,10 @@ int main (int argc, char * argv[])
 
 			case LLS:
 				lls(input);
+				break;
+
+			case LCD:
+				lcd(input);
 				break;
 
 			case MAIN:
