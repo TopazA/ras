@@ -24,6 +24,7 @@
 #define OTHER 	12
 #define EXIT 	13
 #define EDIT_CONFIG 14
+#define LPWD	15
 
 #define PROMPT_SIZE 256
 

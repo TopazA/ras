@@ -27,6 +27,15 @@ int extract_dir(char * line)
 
 }
 
+int lpwd()
+{
+	char * wd = (char *) malloc(1024);
+	getcwd(wd,1024);
+	printf("Current working directory: %s\n",wd);
+	free(wd);
+	return 1;
+}
+
 int lcd(char * line)
 {
 	extract_dir(line);

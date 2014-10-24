@@ -180,6 +180,9 @@ int get_command_type(char * line)
 	else if(start_with("lcd ",line) == 0)
 		type = LCD;
 	
+	else if(strcmp(line,"lpwd") == 0)
+		type = LPWD;
+
 	else type = OTHER;
 	
 	return type;
@@ -243,6 +246,10 @@ int main (int argc, char * argv[])
 
 			case LCD:
 				lcd(input);
+				break;
+
+			case LPWD:
+				lpwd();
 				break;
 
 			case MAIN:
