@@ -33,4 +33,11 @@ You have a question, you think ras is a great software and you want some
 features, you notices a bug or you just want to say 'Hi'. Send me an
 email to stephane@unices.org
 
+BUGS: At the end of each command sent, you'll see a line like this one :
 
+Connection to 127.0.0.1 closed
+
+This is just the ssh client displaying that he closed the connection
+with the server. It does not mean anything for you, ras has no permanent
+connection with the server, it will establish a new connection for each
+command. Therefor, you can ignore this warning.
