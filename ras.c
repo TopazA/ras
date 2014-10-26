@@ -71,7 +71,6 @@ int vim(config * conf,char * line)
 	snprintf(command,DIR_LENGTH,"vim scp://%s@%s/%s/%s"
 			,conf->user[conf->selected],conf->hostname[conf->selected],conf->cwd[conf->selected],l2);
 
-	printf("+++ %s +++\n",command);
 	system(command);
 	free(command);
 	free(l2);
@@ -105,11 +104,9 @@ int cd(config * conf,char * line)
 							conf->user[conf->selected],
 							conf->hostname[conf->selected],conf->cwd[conf->selected],line);
 
-	printf("%s\n",command);
 	fd = popen(command,"r");
 	fread_line(fd,conf->cwd[conf->selected]);
 	pclose(fd);
-	printf("--%s--\n",conf->cwd[conf->selected]);
 
 	free(command);
 	return 0;
