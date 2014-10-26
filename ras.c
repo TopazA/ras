@@ -21,7 +21,7 @@ int ssh(config * conf, char * line)
 {
 	char * command = (char *)malloc(DIR_LENGTH);
 
-	snprintf(command,DIR_LENGTH,"ssh -Y %s@%s 'cd \"%s\" ; %s'",
+	snprintf(command,DIR_LENGTH,"ssh -t -Y %s@%s 'cd \"%s\" ; %s'",
 			conf->user[conf->selected],conf->hostname[conf->selected],conf->cwd[conf->selected],line);
 	system(command);
 
@@ -287,7 +287,7 @@ int main (int argc, char * argv[])
 								conf.hostname[conf.selected],conf.cwd[conf.selected]);
 					break;
 				}
-				else if(conf.selected != 0 && strlen(input) > 1)
+				else if(conf.selected != 0 && strlen(input) > 0)
 				{
 					ssh(&conf,input);
 					break;

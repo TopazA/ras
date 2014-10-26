@@ -19,8 +19,7 @@ instance of vim with remote content of the file.
 First time you start ras, it will create minimal configuration file in
 ~/.ras/config. Edit this file and add your own servers. Then restart
 ras, a menu will display available servers with user. Just hit it's
-number and you're connected, you can now use any non interactive Unix
-command.
+number and you're connected, you can now use any Unix command.
 
 Even I'm using it my self to reach some server over a dumb 3G
 connection, ras is NOT a very serious software. First it's using C
