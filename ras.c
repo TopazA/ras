@@ -212,10 +212,12 @@ int main (int argc, char * argv[])
 	int i;
 	char * input;
 	int type;
+  	hashtable_t * db_alias = ht_create (65536) ;
 
 	snprintf(prompt,PROMPT_SIZE," ==> ");
 	create_default_config_file();
 	i = load_config_file(&conf);
+	load_alias(db_alias);
 	print_list_server(&conf);
 	while(1)
 	{

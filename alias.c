@@ -75,8 +75,7 @@ entry_t * ht_newpair (char *key, char *value)
 }
 
 		  /* Insert a key-value pair into a hash table. */
-void
-ht_set (hashtable_t * hashtable, char *key, char *value)
+void ht_set (hashtable_t * hashtable, char *key, char *value)
 {
   int bin = 0;
   entry_t *newpair = NULL;
@@ -142,8 +141,7 @@ ht_set (hashtable_t * hashtable, char *key, char *value)
 }
 
 		   /* Retrieve a key-value pair from a hash table. */
-char *
-ht_get (hashtable_t * hashtable, char *key)
+char * ht_get (hashtable_t * hashtable, char *key)
 {
   int bin = 0;
   entry_t *pair;
@@ -170,7 +168,84 @@ ht_get (hashtable_t * hashtable, char *key)
 
 }
 
+//Returns the next line for a opened FD. '\n' is already cleaned up.
+int fread_alias(FILE * fd,char * line)
+{
+	char a;
+	int i = 0;
+	while((a = fgetc(fd)) != EOF)
+	{
+		if(a == '\n')
+		{
+			line[i] = '\0';
+			return i;
+		}
+		line[i++] = a;
+	}
+	return EOF;
+}
 
+
+// Get configuration value, returns 1 for an hostname and 2 for an user, 0 for anything else
+int save_alias(hashtable_t * alias,char * text)
+{
+	int i;
+	int j = 0;
+	int returned_value = 0;
+	char * t1 = (char *)malloc(256);
+	char * t2 = (char *)malloc(256);
+	int cond = 0;
+
+	for(i = 0; i <= strlen(text); i++)
+	{
+		if(text[i] == '=' && cond == 0)
+		{
+			t1[j] = '\0';
+			cond = 1;
+			j = 0;
+			continue;
+		}
+		else if(cond == 0)
+			t1[j] = text[i];
+		else
+			t2[j] = text[i];
+		j++;
+	}
+	if(strlen(t1) > 0 && strlen(t2) > 0)
+	{
+		ht_set(alias,t1,t2);
+		returned_value = 1;
+	}
+
+	free(t1);
+	free(t2);
+
+	return returned_value;
+
+}
+
+int load_alias(hashtable_t * alias)
+{
+	char * home = getenv("HOME");
+	char * alias_file = (char *) malloc(1024);
+	FILE * fd;
+	int i = 0;
+	char * line = (char *) malloc(1024);
+	snprintf(alias_file,1024,"%s/.ras/alias",home);
+	if((fd = fopen(alias_file,"r")) != NULL)
+	{
+		while(fread_alias(fd,line) != EOF)
+			i = i + save_alias(alias,line);
+
+		fclose(fd);
+	}
+	free(alias_file);
+	free(line);
+	return i;
+}
+
+
+/*
 int
 main (int argc, char **argv)
 {
@@ -189,3 +264,4 @@ main (int argc, char **argv)
 
   return 0;
 }
+*/

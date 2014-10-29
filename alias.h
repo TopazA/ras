@@ -8,6 +8,7 @@
 #include <limits.h>
 #include <string.h>
 
+
 struct entry_s
 {
 	char *key;
@@ -24,6 +25,12 @@ struct hashtable_s
 };
 
 typedef struct hashtable_s hashtable_t;
+
+hashtable_t * ht_create (int size);
+void ht_set (hashtable_t * hashtable, char *key, char *value);
+char * ht_get (hashtable_t * hashtable, char *key);
+int load_alias(hashtable_t * alias);
+
 
 
 
