@@ -245,31 +245,25 @@ int load_alias(hashtable_t * alias)
 	return i;
 }
 
-int replace_command(char * command,char * alias)
+int replace_command(char * command,char * alias,char * rinput)
 {
-	int i, y, cond = 0;
-	char * tmp = (char *) malloc(256);
-	for(i = 0; alias[i] != '\0' && i < strlen(alias); i++)
-		tmp[i] = alias[i];
+	int i ;
+
+	for(i = 0; command[0] != ' '; i++)
+		command++;
+
+	sprintf(rinput,"%s%s",alias,command);
 	
-	for(y = 0; y < strlen(command); y++)
-	{
-		if(command[y] == ' ' && cond == 0)
-			cond = 1;
-		if(cond == 1)
-			tmp[++i] = command[y];
-	}
-	strncpy(command,tmp,256);
-	free(tmp);
 	return 0;
 }
 
 
-int get_alias(hashtable_t * alias,char * command)
+int get_alias(hashtable_t * alias,char * command,char * rinput)
 {
 	char * arg0 = (char *)malloc(256);
 	int i;
 	char * after;
+	rinput[0] = '\0';
 	for(i = 0; i < strlen(command);i++)
 	{
 		if(command[i] == ' ')
@@ -280,13 +274,9 @@ int get_alias(hashtable_t * alias,char * command)
 	after = ht_get(alias,arg0);
 
 	if(after != NULL)
-	{
-		fprintf(stderr,"--%s--\n",after);
-		replace_command(command,after);
-		fprintf(stderr,"..%s..\n",command);
-	}
+		replace_command(command,after,rinput);
 
-	//free(arg0);
+	free(arg0);
 	return 0;
 }
 /*

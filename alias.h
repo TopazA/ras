@@ -30,7 +30,7 @@ hashtable_t * ht_create (int size);
 void ht_set (hashtable_t * hashtable, char *key, char *value);
 char * ht_get (hashtable_t * hashtable, char *key);
 int load_alias(hashtable_t * alias);
-int get_alias(hashtable_t * alias,char * command);
+int get_alias(hashtable_t * alias,char * command,char * rinput);
 
 
 

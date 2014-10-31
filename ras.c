@@ -212,6 +212,7 @@ int main (int argc, char * argv[])
 	int i;
 	char * input;
 	int type;
+	char * rinput = (char *) malloc(1024);
   	hashtable_t * db_alias = ht_create (65536) ;
 
 	snprintf(prompt,PROMPT_SIZE," ==> ");
@@ -288,8 +289,11 @@ int main (int argc, char * argv[])
 				}
 				else if(conf.selected != 0 && strlen(input) > 0)
 				{
-					//get_alias(db_alias,input);
-					ssh(&conf,input);
+					get_alias(db_alias,input,rinput);
+					if(strlen(rinput) == 0)
+						ssh(&conf,input);
+					else
+						ssh(&conf,rinput);
 					break;
 				}
 
