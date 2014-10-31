@@ -288,7 +288,7 @@ int main (int argc, char * argv[])
 				}
 				else if(conf.selected != 0 && strlen(input) > 0)
 				{
-					get_alias(db_alias,input);
+					//get_alias(db_alias,input);
 					ssh(&conf,input);
 					break;
 				}

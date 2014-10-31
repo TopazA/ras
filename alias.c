@@ -245,6 +245,26 @@ int load_alias(hashtable_t * alias)
 	return i;
 }
 
+int replace_command(char * command,char * alias)
+{
+	int i, y, cond = 0;
+	char * tmp = (char *) malloc(256);
+	for(i = 0; alias[i] != '\0' && i < strlen(alias); i++)
+		tmp[i] = alias[i];
+	
+	for(y = 0; y < strlen(command); y++)
+	{
+		if(command[y] == ' ' && cond == 0)
+			cond = 1;
+		if(cond == 1)
+			tmp[++i] = command[y];
+	}
+	strncpy(command,tmp,256);
+	free(tmp);
+	return 0;
+}
+
+
 int get_alias(hashtable_t * alias,char * command)
 {
 	char * arg0 = (char *)malloc(256);
@@ -260,12 +280,15 @@ int get_alias(hashtable_t * alias,char * command)
 	after = ht_get(alias,arg0);
 
 	if(after != NULL)
-		fprintf(stderr,"Found for '%s' the alias '%s'\n",command,after);
+	{
+		fprintf(stderr,"--%s--\n",after);
+		replace_command(command,after);
+		fprintf(stderr,"..%s..\n",command);
+	}
 
+	//free(arg0);
 	return 0;
 }
-
-
 /*
 int
 main (int argc, char **argv)
