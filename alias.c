@@ -248,8 +248,8 @@ int load_alias(hashtable_t * alias)
 int get_alias(hashtable_t * alias,char * command)
 {
 	char * arg0 = (char *)malloc(256);
-	char * after = (char *)malloc(256);
 	int i;
+	char * after;
 	for(i = 0; i < strlen(command);i++)
 	{
 		if(command[i] == ' ')
@@ -258,7 +258,8 @@ int get_alias(hashtable_t * alias,char * command)
 	}
 	arg0[i] = '\0';
 	after = ht_get(alias,arg0);
-	if(strlen(after) > 0)
+
+	if(after != NULL)
 		fprintf(stderr,"Found for '%s' the alias '%s'\n",command,after);
 
 	return 0;
