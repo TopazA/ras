@@ -1,6 +1,32 @@
 
 #include "ras.h"
 
+char * extract_file(char * line)
+{
+	int i;
+
+	for(i = 0; i < strlen(line); i++)
+	{
+		line++;
+		if(line[i] == ' ' && i > 2)
+			break;
+	}
+	return(line);
+}
+
+
+int get(config * conf, char * line)
+{
+	char * command = (char *)malloc(256);
+
+	snprintf(command,256,"scp %s@%s:%s/%s ./",
+			conf->user[conf->selected],conf->hostname[conf->selected],conf->cwd[conf->selected],extract_file(line));
+	system(command);
+//	fprintf(stderr,"%s\n",command);
+
+	free(command);
+	return 0;
+}
 
 // Print list of available servers
 int print_list_server(config * conf)
@@ -276,6 +302,10 @@ int main (int argc, char * argv[])
 			 		vim(&conf,input);
 					break;
 				}
+
+			case GET:
+				get(&conf,input);
+				break;
 
 			case OTHER:
 				if(conf.selected == 0 && atoi(input) <= i && atoi(input) >= 1)
