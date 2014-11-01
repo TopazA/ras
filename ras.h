@@ -9,7 +9,6 @@
 #include "config.h"
 #include "lcommand.h"
 #include "alias.h"
-#include "scp.h"
 
 // Define reserved commands
 #define CD 		1
