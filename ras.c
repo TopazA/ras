@@ -7,10 +7,11 @@ char * extract_file(char * line)
 
 	for(i = 0; i < strlen(line); i++)
 	{
-		line++;
-		if(line[i] == ' ' && i > 2)
+		if(line[0] == ' ' && i > 2)
 			break;
+		line++;
 	}
+	line++;
 	return(line);
 }
 
@@ -21,8 +22,24 @@ int get(config * conf, char * line)
 
 	snprintf(command,256,"scp %s@%s:%s/%s ./",
 			conf->user[conf->selected],conf->hostname[conf->selected],conf->cwd[conf->selected],extract_file(line));
+
+	fprintf(stderr,"%s\n",command);
 	system(command);
-//	fprintf(stderr,"%s\n",command);
+
+	free(command);
+	return 0;
+}
+
+
+int put(config * conf, char * line)
+{
+	char * command = (char *)malloc(256);
+
+	snprintf(command,256,"scp %s %s@%s:%s/",
+			extract_file(line),conf->user[conf->selected],conf->hostname[conf->selected],conf->cwd[conf->selected]);
+
+	fprintf(stderr,"%s\n",command);
+	system(command);
 
 	free(command);
 	return 0;
@@ -305,6 +322,10 @@ int main (int argc, char * argv[])
 
 			case GET:
 				get(&conf,input);
+				break;
+
+			case PUT:
+				put(&conf,input);
 				break;
 
 			case OTHER:
