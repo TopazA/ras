@@ -249,10 +249,10 @@ int replace_command(char * command,char * alias,char * rinput)
 {
 	int i ;
 
-	for(i = 0; command[0] != ' '; i++)
+	for(i = 0; command[0] != ' ' && command[0] != '\0'; i++)
 		command++;
 
-	sprintf(rinput,"%s%s",alias,command);
+	snprintf(rinput,1024,"%s%s",alias,command);
 	
 	return 0;
 }
