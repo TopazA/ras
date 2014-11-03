@@ -81,7 +81,11 @@ int pwd(config * conf)
 	if(strlen(conf->cwd[conf->selected]) <= 0)
 		snprintf(command,DIR_LENGTH,"ssh %s@%s pwd",conf->user[conf->selected],conf->hostname[conf->selected]);
 
-	fd = popen(command,"r");
+	if((fd = popen(command,"r")) == NULL)
+	{
+		fprintf(stderr,"FATAL: Can not fork\n");
+		exit(-1);
+	}
 	fread_line(fd,conf->cwd[conf->selected]);
 	pclose(fd);
 
@@ -157,7 +161,7 @@ int cd(config * conf,char * line)
 
 int help()
 {
-	printf("\tRAS Ver 0.04a\n\n");
+	printf("\tRAS Ver 0.05a\n\n");
 	printf("\t\tTo connect to a server\n");
 	printf("\tType the number of the server you want to connect to\n\n");
 	printf("\t\tTo disconnect from a server\n");
@@ -231,20 +235,20 @@ int get_command_type(char * line)
 	return type;
 }
 
+// Edit Config
 int edit_config(config * conf)
 {
 	char * editor = getenv("EDITOR");
-	char * home = getenv("HOME");
 	char * cmd = (char *)malloc(256);
 
 	if(editor == NULL)
-	{
-		fprintf(stderr,"Please setup your EDITOR variable to use ras\n");
-		exit(-1);
-	}
-	snprintf(cmd,256,"%s %s/.ras/config",editor,home);
+		snprintf(cmd,256,"vi %s/.ras/config",getenv("HOME"));
+	else
+		snprintf(cmd,256,"%s %s/.ras/config",editor,getenv("HOME"));
+
 	system(cmd);
 	free(cmd);
+
 	clean_conf(conf);
 	return load_config_file(conf);
 }
