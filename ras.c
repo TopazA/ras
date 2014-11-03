@@ -303,8 +303,8 @@ int main (int argc, char * argv[])
 				{
 					snprintf(prompt,256," ==> ");
 					conf.selected = 0;
-					break;
 				}
+				break;
 			
 			case CD:
 				if(conf.selected != 0)
@@ -313,22 +313,22 @@ int main (int argc, char * argv[])
 					snprintf(prompt,PROMPT_SIZE,"[ %s ] %s@%s:%s ==> ",
 								conf.server[conf.selected],conf.user[conf.selected],
 								conf.hostname[conf.selected],conf.cwd[conf.selected]);
-					break;
 				}
+				break;
 
 			case VIM:
 				if(conf.selected != 0 )
-				{
 			 		vim(&conf,input);
-					break;
-				}
+				break;
 
 			case GET:
-				get(&conf,input);
+				if(conf.selected != 0)
+					get(&conf,input);
 				break;
 
 			case PUT:
-				put(&conf,input);
+				if(conf.selected != 0)
+					put(&conf,input);
 				break;
 
 			case OTHER:
@@ -365,3 +365,4 @@ int main (int argc, char * argv[])
 	free(prompt);
 	return 0;
 }
+
