@@ -162,12 +162,15 @@ int help()
 	printf("\tType the number of the server you want to connect to\n\n");
 	printf("\t\tTo disconnect from a server\n");
 	printf("\tType 'm', it brings you back to main menu\n\n");
-	printf("\tOnce connected to a server, you can use any *non* interactive command\n");
-	printf("\tUsage of interactive software is not recommended, result is not warranted\n");
+	printf("\tOnce connected to a server, you can use any command\n");
 	printf("\tEdit a file using the command 'vim' followed by the name of the file\n");
 	printf("\t(Vim is required for this last feature to work, other editor are *NOT* supported\n\n"); 
+	printf("\tLocal commands lls, lmkdir, lrmdir, lcd and lpwd are available\n\n");
+	printf("\tget and put allow you to transfer files\n\n");
 	printf("\tYour configuration file is in %s/.ras/config\n",getenv("HOME"));
-	printf("\tBy typing 'edit_config' from ras, you can edit the configuration file\n");
+	printf("\tBy typing 'edit_config' from ras, you can edit the configuration file\n\n");
+	printf("\tYou can define some alias in %s/.ras/alias\n",getenv("HOME"));
+	printf("\tls=ls -l will replace 'ls' by 'ls -la'\n\n");
 	printf("\n\tBug reports to stephane@unices.org\n");
 	return 0;
 }
