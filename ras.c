@@ -291,7 +291,8 @@ int main (int argc, char * argv[])
 				break;
 
 			case LCD:
-				lcd(input);
+				if(lcd(input) != 0)
+					fprintf(stderr,"Error changing directory\n");
 				break;
 
 			case LPWD:
