@@ -50,12 +50,12 @@ int print_list_server(config * conf)
 {
 	int j;
 	printf("\n");
+
 	for(j = 1; j <= conf->quantity;j++)
-	{
-		printf("%d / %s:\t",j,conf->server[j]);
-		printf("%s@%s\n",conf->user[j],conf->hostname[j]);
-	}
+		printf("%d / %s:\t%s@%s\n",j,conf->server[j],conf->user[j],conf->hostname[j]);
+
 	printf("\n");
+
 	return 1;
 }
 
@@ -115,8 +115,8 @@ int vim(config * conf,char * line)
 	}
 	l2[e] = '\0';
 
-	snprintf(command,DIR_LENGTH,"vim scp://%s@%s/%s/%s"
-			,conf->user[conf->selected],conf->hostname[conf->selected],conf->cwd[conf->selected],l2);
+	snprintf(command,DIR_LENGTH,"vim scp://%s@%s/%s/%s",
+		conf->user[conf->selected],conf->hostname[conf->selected],conf->cwd[conf->selected],l2);
 
 	system(command);
 	free(command);
@@ -284,6 +284,7 @@ int main (int argc, char * argv[])
 
 			case EDIT_CONFIG:
 				i = edit_config(&conf);
+				snprintf(prompt,256," ==> ");
 				break;
 
 			case HELP:
