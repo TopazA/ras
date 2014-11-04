@@ -6,6 +6,7 @@
 #include <string.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <errno.h>
 #include "config.h"
 #include "lcommand.h"
 #include "alias.h"

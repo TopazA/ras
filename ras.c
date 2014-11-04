@@ -83,7 +83,7 @@ int pwd(config * conf)
 
 	if((fd = popen(command,"r")) == NULL)
 	{
-		fprintf(stderr,"FATAL: Can not fork\n");
+		fprintf(stderr,"FATAL: %s\n", strerror(errno));
 		exit(-1);
 	}
 	fread_line(fd,conf->cwd[conf->selected]);
