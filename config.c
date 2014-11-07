@@ -29,7 +29,7 @@ int create_default_config_file()
 		}
 		else
 		{
-			fprintf(stderr,"FATAL: Can not open %s for writing\n",config_file);
+			fprintf(stderr,"FATAL: Can not open %s %s\n", config_file, strerror(errno));
 			exit(-1);
 		}
 	}
@@ -140,7 +140,7 @@ int load_config_file(config * conf)
 	snprintf(config_file,DIR_LENGTH,"%s/.ras/config",getenv("HOME"));
 	if((fd = fopen(config_file,"r")) == NULL)
 	{
-		fprintf(stderr,"FATAL: Can not open %s for reading\n",config_file);
+		fprintf(stderr,"FATAL: Can not open %s %s\n", config_file, strerror(errno));
 		exit(-1);
 	}
 

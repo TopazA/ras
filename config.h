@@ -4,6 +4,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <errno.h>
 
 #define MAX_ENTRIES			64
 #define CONF_LINE_LENGTH	64
