@@ -44,8 +44,9 @@ int fread_line(FILE * fd,char * line)
 {
 	char a;
 	int i = 0;
-	while((a = fgetc(fd)) != EOF)
+	while(feof(fd) == 0)
 	{
+		a = fgetc(fd);
 		if(a == '\n')
 		{
 			line[i] = '\0';
